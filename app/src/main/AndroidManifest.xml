@@ -19,7 +19,9 @@
       </intent-filter>
     </activity>
 
-    <service android:name="ca.klostermann.pttbuttontest.PTTButtonService"></service>
+    <service
+        android:name="ca.klostermann.pttbuttontest.PTTButtonService"
+        android:stopWithTask="true" />
 
     <!--<receiver android:name=".PTTButtonReceiver"  android:exported="true">-->
       <!--<intent-filter>-->

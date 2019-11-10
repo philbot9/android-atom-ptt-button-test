@@ -12,6 +12,14 @@ import java.util.Date;
 import java.util.TimeZone;
 
 
+/**
+ * CURRENTLY DEACTIVATED!
+ *
+ * This is only kept here for testing purposes. To enable the BroadcastReceiver uncomment the
+ * <receiver> declaration in AndroidManifest.xml:26-31 and prevent the MainActivity from starting
+ * the PTTButtonService (MainActivity.java:43).
+ */
+
 public class PTTButtonReceiver extends BroadcastReceiver {
   public static final String TAG = PTTButtonReceiver.class.getCanonicalName();
 
