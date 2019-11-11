@@ -20,7 +20,7 @@
     </activity>
 
     <service
-        android:name="ca.klostermann.pttbuttontest.PTTButtonService"
+        android:name="ca.klostermann.pttbuttontest.PTTButtonReceiverService"
         android:stopWithTask="true" />
 
     <!--<receiver android:name=".PTTButtonReceiver"  android:exported="true">-->

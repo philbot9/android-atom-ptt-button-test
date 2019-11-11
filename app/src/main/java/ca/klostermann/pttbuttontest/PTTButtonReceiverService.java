@@ -9,24 +9,18 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+public class PTTButtonReceiverService extends Service {
+  public static final String TAG = PTTButtonReceiverService.class.getCanonicalName();
+  public static final String PTT_ACTION_EVENT = PTTButtonReceiverService.class.getSimpleName() + "/PTT_ACTION_EVENT";
 
-public class PTTButtonService extends Service {
-  public static final String TAG = PTTButtonService.class.getCanonicalName();
-  public static final String PTT_RX_ACTION = PTTButtonService.class.getSimpleName() + "/PTT_RX_ACTION";
-
-  private static final String PTT_DOWN_INTENT = "android.intent.action.PTT.down";
-  private static final String PTT_UP_INTENT = "android.intent.action.PTT.up";
+  private final String PTT_DOWN_INTENT_ACTION = "android.intent.action.PTT.down";
+  private final String PTT_UP_INTENT_ACTION = "android.intent.action.PTT.up";
 
   Sounds mSounds;
 
   @Override
   public void onCreate() {
     super.onCreate();
-    Log.d(TAG, "Creating PTTButtonService");
 
     startForeground(AppNotification.getNotificationId(),
       AppNotification.getNotification(this));
@@ -37,8 +31,6 @@ public class PTTButtonService extends Service {
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
     super.onStartCommand(intent, flags, startId);
-
-    Log.d(TAG, "Starting PTTButtonService");
 
     registerPttActionReceiver();
 
@@ -59,8 +51,8 @@ public class PTTButtonService extends Service {
 
   private void registerPttActionReceiver() {
     IntentFilter pttActionIntentFilter = new IntentFilter();
-    pttActionIntentFilter.addAction(PTT_DOWN_INTENT);
-    pttActionIntentFilter.addAction(PTT_UP_INTENT);
+    pttActionIntentFilter.addAction(PTT_DOWN_INTENT_ACTION);
+    pttActionIntentFilter.addAction(PTT_UP_INTENT_ACTION);
     pttActionIntentFilter.setPriority(99999999);
 
     registerReceiver(pttActionReceiver, pttActionIntentFilter);
@@ -73,35 +65,36 @@ public class PTTButtonService extends Service {
   private BroadcastReceiver pttActionReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {
-      onPttActionReceived(context, intent);
+      onPttActionReceived(intent);
     }
   };
 
-  protected void onPttActionReceived (Context _context, Intent intent) {
+  protected void onPttActionReceived (Intent intent) {
     String action = intent.getAction();
 
     Log.d(TAG, "Received PTT Button action: " + action);
 
-    Intent pttActionIntent = new Intent();
-    pttActionIntent.setAction(PTT_RX_ACTION);
-    pttActionIntent.putExtra("timestamp", getCurrentTimestamp());
-    pttActionIntent.putExtra("action", action);
+    playButtonActionSound(action);
 
-    LocalBroadcastManager.getInstance(this).sendBroadcast(pttActionIntent);
+    broadcastPttAction(action);
+  }
 
-
-    if (action.equals(PTT_DOWN_INTENT)) {
+  private void playButtonActionSound(String action) {
+    if (action.equals(PTT_DOWN_INTENT_ACTION)) {
       mSounds.playPttPressed();
-    } else if (action.equals(PTT_UP_INTENT)) {
+    } else if (action.equals(PTT_UP_INTENT_ACTION)) {
       mSounds.playPttReleased();
     }
   }
 
-  private String getCurrentTimestamp() {
-    TimeZone tz = TimeZone.getTimeZone("UTC");
-    DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S");
-    df.setTimeZone(tz);
+  private void broadcastPttAction(String action) {
+    Intent pttActionIntent = new Intent();
+    String timestamp = Timestamp.now();
 
-    return df.format(new Date());
+    pttActionIntent.setAction(PTT_ACTION_EVENT);
+    pttActionIntent.putExtra("timestamp", timestamp);
+    pttActionIntent.putExtra("action", action);
+
+    LocalBroadcastManager.getInstance(this).sendBroadcast(pttActionIntent);
   }
 }

@@ -6,25 +6,21 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
 
 
 /**
  * CURRENTLY DEACTIVATED!
  *
- * This is only kept here for testing purposes. To enable the BroadcastReceiver uncomment the
- * <receiver> declaration in AndroidManifest.xml:26-31 and prevent the MainActivity from starting
- * the PTTButtonService (MainActivity.java:43).
+ * This class was used to test the PTT Button with a Manifest-declared BroadcastReceiver.
+ * To enable th BroadcastReceiver uncomment the <receiver> declaration in AndroidManifest.xml:26-31
+ * and prevent the MainActivity from starting the PTTButtonService (MainActivity.java:37).
  */
 
 public class PTTButtonReceiver extends BroadcastReceiver {
   public static final String TAG = PTTButtonReceiver.class.getCanonicalName();
 
-  private static final String PTT_DOWN_INTENT = "android.intent.action.PTT.down";
-  private static final String PTT_UP_INTENT = "android.intent.action.PTT.up";
+  private static final String PTT_DOWN_INTENT_ACTION = "android.intent.action.PTT.down";
+  private static final String PTT_UP_INTENT_ACTION = "android.intent.action.PTT.up";
 
   @Override
   public void onReceive(Context context, Intent intent) {
@@ -32,29 +28,29 @@ public class PTTButtonReceiver extends BroadcastReceiver {
 
     Log.d(TAG, "Received PTT Button action: " + action);
 
-    Intent pttActionIntent = new Intent();
-    pttActionIntent.setAction(PTTButtonService.PTT_RX_ACTION);
-    pttActionIntent.putExtra("timestamp", getCurrentTimestamp());
-    pttActionIntent.putExtra("action", action);
+    playButtonActionSound(context, action);
 
-    LocalBroadcastManager.getInstance(context).sendBroadcast(pttActionIntent);
+    broadcastPttAction(context, action);
+  }
 
-
+  private void playButtonActionSound(Context context, String action) {
     Sounds sounds = new Sounds(context);
-    if (action.equals(PTT_DOWN_INTENT)) {
+    if (action.equals(PTT_DOWN_INTENT_ACTION)) {
       sounds.playPttPressed();
-    } else if (action.equals(PTT_UP_INTENT)) {
+    } else if (action.equals(PTT_UP_INTENT_ACTION)) {
       sounds.playPttReleased();
     }
   }
 
+  private void broadcastPttAction(Context context, String action) {
+    Intent pttActionIntent = new Intent();
+    String timestamp = Timestamp.now();
 
-  private String getCurrentTimestamp() {
-    TimeZone tz = TimeZone.getTimeZone("UTC");
-    DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S");
-    df.setTimeZone(tz);
+    pttActionIntent.setAction(PTTButtonReceiverService.PTT_ACTION_EVENT);
+    pttActionIntent.putExtra("timestamp", timestamp);
+    pttActionIntent.putExtra("action", action);
 
-    return df.format(new Date());
+    LocalBroadcastManager.getInstance(context).sendBroadcast(pttActionIntent);
   }
 }
 

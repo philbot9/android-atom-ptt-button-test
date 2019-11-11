@@ -6,39 +6,31 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 public class AppNotification {
   public static final String TAG = AppNotification.class.getCanonicalName();
 
   private static final int NOTIFICATION_ID = 32165;
-  private static final String CHANNEL_ID = "ptt-foreground-service";
+  private static final String NOTIFICATION_CHANNEL_ID = "ptt-foreground-service";
+  private static final String NOTIFICATION_TITLE = "PTT Button Test";
+  private static final String NOTIFICATION_CONTENT = "App is running in Background";
 
-  private static Notification notification;
+  private static Notification mNotification;
 
   public static Notification getNotification(Context context) {
-    final String title = "PTT Button Test";
-    final String content = "App is running in Background";
-
-
-    if(notification == null) {
+    if(mNotification == null) {
       createNotificationChannel(context);
-
-      notification = new NotificationCompat.Builder(context, CHANNEL_ID)
-        .setContentTitle(title)
-        .setContentText(content)
-        .setSmallIcon(R.mipmap.ic_launcher)
-        .build();
+      mNotification = createNotification(context);
     }
 
-    return notification;
+    return mNotification;
   }
 
   private static void createNotificationChannel (Context context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       NotificationChannel serviceChannel = new NotificationChannel(
-        CHANNEL_ID,
-        "PTT Service Channel",
+        NOTIFICATION_CHANNEL_ID,
+        "PTTButtonReceiverService Notification Channel",
         NotificationManager.IMPORTANCE_LOW
       );
 
@@ -47,6 +39,14 @@ public class AppNotification {
       NotificationManager manager = context.getSystemService(NotificationManager.class);
       manager.createNotificationChannel(serviceChannel);
     }
+  }
+
+  private static Notification createNotification (Context context) {
+    return new NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
+            .setContentTitle(NOTIFICATION_TITLE)
+            .setContentText(NOTIFICATION_CONTENT)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .build();
   }
 
   public static int getNotificationId() {
